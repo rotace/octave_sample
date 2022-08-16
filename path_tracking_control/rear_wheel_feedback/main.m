@@ -24,7 +24,7 @@ function main
     T = 100.0; % max simulation time
 
     % init
-    state = State(x=-0.0, y=-3.0, yaw=0.0, v=0.0);
+    state = State(x=-0.0, y=-0.0, yaw=0.0, v=0.0);
     target_course = TargetCourse(cx, cy);
 
     last_idx = length(cx) - 1;
@@ -39,7 +39,7 @@ function main
     while T >= t && last_idx > tgt_idx
         % calc control input
         ai = proportional_control(target_speed, state.v);
-        di = rear_wheel_feedback_steer_control(state, target_course);
+        [di, tgt_idx] = rear_wheel_feedback_steer_control(state, target_course);
         state.update(ai, di);
         target_course.disp();
 
@@ -48,7 +48,7 @@ function main
         set(h_tgt, "ydata", cy(tgt_idx));
         pause(0.03);
 
-        t += dt;
+        t+= dt;
     end
     
 end
@@ -60,7 +60,7 @@ function a = proportional_control(target, current)
 end
 
 
-function delta = rear_wheel_feedback_steer_control(state, trajectory)
+function [delta, idx] = rear_wheel_feedback_steer_control(state, trajectory)
     global WB KTH KE
     [idx, e] = trajectory.search_target_index(state);
     th = arg(state.calc_tangent_vector()/trajectory.calc_tangent_vector(idx)); % calc difference yaw
@@ -68,15 +68,12 @@ function delta = rear_wheel_feedback_steer_control(state, trajectory)
     v = state.v;
 
     omega = v * k * cos(th) / (1.0 - k * e);
-    omega = omega - KTH * abs(v) * th;
-    omega = omega - KE * v * sin(th) * e / th;
+    omega-= KTH * abs(v) * th;
+    omega-= KE * v * sin(th) * e / th;
 
     if th != 0.0 && omega != 0.0
         delta = atan(WB * omega / v);
     else
         delta = 0.0
     end
-
-    th
-    k
 end
