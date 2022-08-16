@@ -21,7 +21,7 @@ classdef TargetCourse < handle
             disp (["TargetCourse(", num2str(self.distance), ")"]);
         end
 
-        function [idx, Lf] = search_target_index(self, state)
+        function idx = search_target_index(self, state)
             global k Lfc Kp
             
             % To speed up nearest point search
@@ -56,7 +56,7 @@ classdef TargetCourse < handle
                 if idx + 1 >= length(self.cx)
                     break;
                 end
-                idx += 1;
+                idx+= 1;
             end
         end
     end

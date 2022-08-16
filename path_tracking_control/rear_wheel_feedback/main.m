@@ -24,12 +24,12 @@ function main
     T = 100.0; % max simulation time
 
     % init
-    state = State(x=-0.0, y=-0.0, yaw=0.0, v=0.0);
+    state = State(x=-0.0, y=-3.0, yaw=0.0, v=0.0);
     target_course = TargetCourse(cx, cy);
 
     last_idx = length(cx) - 1;
     t = 0.0;
-    [tgt_idx, ~] = target_course.search_target_index(state);
+    tgt_idx = target_course.search_target_index(state);
 
     hax1=subplot(1,1,1);
     hold on
@@ -62,7 +62,18 @@ end
 
 function [delta, idx] = rear_wheel_feedback_steer_control(state, trajectory)
     global WB KTH KE
-    [idx, e] = trajectory.search_target_index(state);
+    idx = trajectory.search_target_index(state);
+
+    tx = trajectory.cx(idx);
+    ty = trajectory.cy(idx);
+    dif_vec = (tx - state.x) + j*(ty - state.y);
+    yaw_vec = exp(state.yaw*j);
+    e = abs(dif_vec);
+    alpha = arg(dif_vec/yaw_vec);
+    if alpha > 0
+        e*= -1;
+    end
+
     th = arg(state.calc_tangent_vector()/trajectory.calc_tangent_vector(idx)); % calc difference yaw
     k = abs(trajectory.calc_normal_vector(idx)); % calc curvature
     v = state.v;

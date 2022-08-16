@@ -29,7 +29,7 @@ function main
 
     last_idx = length(cx) - 1;
     t = 0.0;
-    [tgt_idx, ~] = target_course.search_target_index(state);
+    tgt_idx = target_course.search_target_index(state);
 
     hax1=subplot(1,1,1);
     hold on
@@ -61,8 +61,8 @@ end
 
 
 function [delta, idx] = pure_pursuit_steer_control(state, trajectory, idx_prev)
-    global WB
-    [idx, Lf] = trajectory.search_target_index(state);
+    global WB k Lfc
+    idx = trajectory.search_target_index(state);
 
     if idx_prev >= idx
         idx = idx_prev;
@@ -76,6 +76,8 @@ function [delta, idx] = pure_pursuit_steer_control(state, trajectory, idx_prev)
         ty = trajectory.cy(end);
         idx = length(trajectory.cx) - 1;
     end
+
+    Lf = k * state.v + Lfc;
 
     dif_vec = (tx - state.rear_x) + j*(ty - state.rear_y);
     yaw_vec = exp(state.yaw*j);

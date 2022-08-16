@@ -58,18 +58,11 @@ classdef TargetCourse < handle
             vec = vec / dist;
         end
 
-        function [idx, e] = search_target_index(self, state)
+        function idx = search_target_index(self, state)
 
             d = state.calc_distance(self.cx, self.cy);
-            [e, idx] = min(d);
-            self.distance = e;
+            [self.distance, idx] = min(d);
 
-            dif_vec = (self.cx(idx) - state.x) + j*(self.cy(idx) - state.y);
-            yaw_vec = exp(state.yaw*j);
-            alpha = arg(dif_vec/yaw_vec);
-            if alpha > 0
-                e*= -1;
-            end
         end
     end
 end

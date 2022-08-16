@@ -1,9 +1,12 @@
 classdef State < handle
     properties (Access = "public")
+        is_rear_ref = false;
         v;
         x;
         y;
         yaw;
+        rear_x;
+        rear_y;
     end
     
     methods
@@ -14,6 +17,8 @@ classdef State < handle
             self.y = y;
             self.yaw = yaw;
             self.v = v;
+            self.rear_x = self.x - ((WB / 2) * cos(self.yaw));
+            self.rear_y = self.y - ((WB / 2) * sin(self.yaw));
         end
 
         function disp(self)
@@ -32,11 +37,18 @@ classdef State < handle
             self.y += self.v * sin(self.yaw) * dt;
             self.yaw += self.v / WB * tan(delta) * dt;
             self.v += a * dt;
+            self.rear_x = self.x - ((WB / 2) * cos(self.yaw));
+            self.rear_y = self.y - ((WB / 2) * sin(self.yaw));
         end
 
         function dist = calc_distance(self, point_x, point_y)
-            dx = self.x - point_x;
-            dy = self.y - point_y;
+            if self.is_rear_ref
+                dx = self.rear_x - point_x;
+                dy = self.rear_y - point_y;
+            else
+                dx = self.x - point_x;
+                dy = self.y - point_y;
+            end
             % dist = norm([dx,dy]);
             dist = sqrt( dx.^2 + dy.^2 );
 
