@@ -9,6 +9,7 @@
 | pure_pursuit | 単純追跡アルゴリズム |
 | rear_wheel_feedback | Rear Wheel Feedback追跡アルゴリズム |
 | lqr | 線形二次レギュレータ追跡アルゴリズム |
+| all | 追跡アルゴリズムまとめ |
 
 #### 参考文献
 
