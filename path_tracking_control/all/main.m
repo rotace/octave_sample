@@ -1,6 +1,5 @@
 function main
     clear all
-    pkg load control
 
     % Parameter
     global Kp dt

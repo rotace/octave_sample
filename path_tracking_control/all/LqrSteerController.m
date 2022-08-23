@@ -9,13 +9,14 @@ classdef LqrSteerController < handle
     methods
         function self = LqrSteerController(Q=diag([1,1,1,1]), R=eye(1))
             disp ("New instance created.");
+            pkg load control
             self.Q=Q;
             self.R=R;
         end
 
         function idx = search_target_index(self, state, trajectory)
 
-            d = state.calc_distance(trajectory.cx, trajectory.cy);
+            d = state.calc_distance_list(trajectory);
             [~, idx] = min(d);
 
         end

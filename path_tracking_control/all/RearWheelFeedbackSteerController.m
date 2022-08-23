@@ -13,7 +13,7 @@ classdef RearWheelFeedbackSteerController < handle
 
         function idx = search_target_index(self, state, trajectory)
 
-            d = state.calc_distance(trajectory.cx, trajectory.cy);
+            d = state.calc_distance_list(trajectory);
             [~, idx] = min(d);
 
         end

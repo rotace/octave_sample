@@ -41,13 +41,25 @@ classdef State < handle
             self.rear_y = self.y - ((self.WB / 2) * sin(self.yaw));
         end
 
-        function dist = calc_distance(self, point_x, point_y, is_rear_ref=false)
+        function dist = calc_distance_list(self, trajectory, is_rear_ref=false)
             if is_rear_ref
-                dx = self.rear_x - point_x;
-                dy = self.rear_y - point_y;
+                dx = self.rear_x - trajectory.cx_;
+                dy = self.rear_y - trajectory.cy_;
             else
-                dx = self.x - point_x;
-                dy = self.y - point_y;
+                dx = self.x - trajectory.cx_;
+                dy = self.y - trajectory.cy_;
+            end
+            % dist = norm([dx,dy]);
+            dist = sqrt( dx.^2 + dy.^2 );
+
+        end
+        function dist = calc_distance(self, trajectory, idx, is_rear_ref=false)
+            if is_rear_ref
+                dx = self.rear_x - trajectory.cx(idx);
+                dy = self.rear_y - trajectory.cy(idx);
+            else
+                dx = self.x - trajectory.cx(idx);
+                dy = self.y - trajectory.cy(idx);
             end
             % dist = norm([dx,dy]);
             dist = sqrt( dx.^2 + dy.^2 );
