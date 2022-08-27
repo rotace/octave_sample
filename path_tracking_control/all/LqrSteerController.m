@@ -24,9 +24,7 @@ classdef LqrSteerController < handle
             global dt
             idx = self.search_target_point(state, trajectory);
         
-            tx = trajectory.cx(idx);
-            ty = trajectory.cy(idx);
-            dif_vec = (tx - state.x) + j*(ty - state.y);
+            dif_vec = trajectory.calc_position_vector(idx) - state.calc_position_vector();
             yaw_vec = exp(state.yaw*j);
             e = abs(dif_vec);
             alpha = arg(dif_vec/yaw_vec);

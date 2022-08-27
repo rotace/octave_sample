@@ -25,6 +25,14 @@ classdef State < handle
             disp (["State(", num2str(self.x), ",", num2str(self.y),")"]);
         end
 
+        function vec = calc_rear_position_vector(self)
+            vec = self.rear_x + 1j*self.rear_y;
+        end
+
+        function vec = calc_position_vector(self)
+            vec = self.x + 1j*self.y;
+        end
+
         function vec = calc_tangent_vector(self)
             vec = exp(self.yaw*j);
         end

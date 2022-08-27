@@ -52,6 +52,10 @@ classdef Trajectory < handle
             dist = sqrt( dx.^2 + dy.^2 );
         end
 
+        function vec = calc_position_vector(self, idx)
+            vec = self.cx(idx) + 1j*self.cy(idx);
+        end
+
         function vec = calc_tangent_vector(self, idx)
             assert(idx>0)
             assert(idx<=length(self.cx_))

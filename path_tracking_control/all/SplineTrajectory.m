@@ -67,6 +67,10 @@ classdef SplineTrajectory < handle
             dist = sqrt( dx.^2 + dy.^2 );
         end
 
+        function vec = calc_position_vector(self, s)
+            vec = self.cx(s) + 1j*self.cy(s);
+        end
+
         function vec = calc_tangent_vector(self, s)
             vec = fnval(self.dx_, s) + j*fnval(self.dy_, s);
             vec = vec / abs(vec);
@@ -109,7 +113,7 @@ classdef SplineTrajectory < handle
                 options = optimset("GradObj", "on");
                 s0 = self.last_s_;
                 fun = @rosenbrockwithgrad;
-                [X, FVAL, CVG, OUTP] = fmincon(fun, s0, -1, 0, [], [], [], [], [], options);
+                [X, FVAL, CVG, OUTP] = fmincon(fun, s0, -1, s0, [], [], [], [], [], options);
                 s = X;
                 self.last_s_ = s;
             end

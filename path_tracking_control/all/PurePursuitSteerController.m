@@ -28,9 +28,7 @@ classdef PurePursuitSteerController < handle
             end
         
             Lf = self.k * state.v + self.Lfc;
-            tx = trajectory.cx(idx);
-            ty = trajectory.cy(idx);
-            dif_vec = (tx - state.rear_x) + j*(ty - state.rear_y);
+            dif_vec = trajectory.calc_position_vector(idx) - state.calc_rear_position_vector();
             yaw_vec = exp(state.yaw*j);
             alpha = arg(dif_vec/yaw_vec);
             delta = atan( (2.0 * state.WB * sin(alpha))/Lf );

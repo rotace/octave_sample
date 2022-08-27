@@ -49,13 +49,20 @@ function main(ttype=1, ctype=1)
         [di, s] = controller.steer_control(state, trajectory);
         state.update(ai, di);
 
-        tvec = trajectory.calc_tangent_vector(s);
-        nvec = trajectory.calc_normal_vector(s);
         plot(hax1, state.x, state.y, "b.")
-        % plot(hax2, real(tvec), imag(tvec), "b.")
-        % plot(hax3, real(nvec), imag(nvec), "b.")
         set(h_tgt, "xdata", trajectory.cx(s));
         set(h_tgt, "ydata", trajectory.cy(s));
+
+        % tvec = trajectory.calc_tangent_vector(s);
+        % nvec = trajectory.calc_normal_vector(s);
+        % plot(hax2, real(tvec), imag(tvec), "b.")
+        % plot(hax3, real(nvec), imag(nvec), "b.")
+
+        % e = abs(trajectory.calc_position_vector(s) - state.calc_position_vector());
+        % th = arg(state.calc_tangent_vector()/trajectory.calc_tangent_vector(s));
+        % plot(hax2, t, e, "b.")
+        % plot(hax3, t, th, "b.")
+
         pause(0.03);
 
         t+= dt;
