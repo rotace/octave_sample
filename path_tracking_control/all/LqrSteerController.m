@@ -14,16 +14,15 @@ classdef LqrSteerController < handle
             self.R=R;
         end
 
-        function idx = search_target_index(self, state, trajectory)
+        function idx = search_target_point(self, state, trajectory)
 
-            d = state.calc_distance_list(trajectory);
-            [~, idx] = min(d);
+            idx = trajectory.calc_nearest_point(state.x, state.y);
 
         end
 
         function [delta, idx] = steer_control(self, state, trajectory)
             global dt
-            idx = self.search_target_index(state, trajectory);
+            idx = self.search_target_point(state, trajectory);
         
             tx = trajectory.cx(idx);
             ty = trajectory.cy(idx);
