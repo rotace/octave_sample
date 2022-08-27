@@ -22,7 +22,7 @@ function main(ttype=1, ctype=1)
     if     ctype==1
         controller = PurePursuitSteerController(k=0.1, Lfc=2.0);
     elseif ctype==2
-        controller = LqrSteerController(Q=diag([1,1,1,1]), R=eye(1));
+        controller = LqrSteerController(Q=diag([10,0.01,1,0.01]), R=eye(1));
     else
         controller = RearWheelFeedbackSteerController(KTH=1.0, KE=0.5);
     end
