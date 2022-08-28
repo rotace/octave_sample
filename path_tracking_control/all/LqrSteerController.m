@@ -26,12 +26,9 @@ classdef LqrSteerController < handle
         
             dif_vec = trajectory.calc_position_vector(idx) - state.calc_position_vector();
             yaw_vec = exp(state.yaw*j);
-            e = abs(dif_vec);
             alpha = arg(dif_vec/yaw_vec);
-            if alpha > 0
-                e*= -1;
-            end
-        
+            e = abs(dif_vec) * sign(-alpha);
+
             th = arg(state.calc_tangent_vector()/trajectory.calc_tangent_vector(idx)); % calc difference yaw
             k = abs(trajectory.calc_normal_vector(idx)); % calc curvature
             v = state.v;
@@ -62,6 +59,13 @@ classdef LqrSteerController < handle
             ff = atan( state.WB * k );
             fb = ( -K * X );
             delta = ff + fb;
+
+            % delta limit
+            if sign(delta)>0
+                delta = min(delta, +60/180*pi);
+            else
+                delta = max(delta, -60/180*pi);
+            end
         
             self.e_prev = e;
             self.th_prev = th;

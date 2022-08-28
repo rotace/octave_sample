@@ -23,11 +23,8 @@ classdef RearWheelFeedbackSteerController < handle
 
             dif_vec = trajectory.calc_position_vector(idx) - state.calc_position_vector();
             yaw_vec = exp(state.yaw*j);
-            e = abs(dif_vec);
             alpha = arg(dif_vec/yaw_vec);
-            if alpha > 0
-                e*= -1;
-            end
+            e = abs(dif_vec) * sign(-alpha);
         
             th = arg(state.calc_tangent_vector()/trajectory.calc_tangent_vector(idx)); % calc difference yaw
             k = abs(trajectory.calc_normal_vector(idx)); % calc curvature
