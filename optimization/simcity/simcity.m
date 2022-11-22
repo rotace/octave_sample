@@ -6,9 +6,9 @@ clear all
 common
 
 function dispResult(xmin)
-    [work_max, shop_max, time_max] = size(xmin);
+    [work_max, proc_max, time_max] = size(xmin);
     for w=1:work_max
-        for s=1:shop_max
+        for s=1:proc_max
             [~,idx] = max(xmin(w,s,:));
             disp(["[", num2str(w), ",", num2str(s), "]= ", num2str(idx-1)])
         end
@@ -26,9 +26,9 @@ function dispShopSch(xmin)
 end
 
 
-work_max = 3;
-shop_max = 3;
-time_max = 30;
+work_max = 3; % 仕事の数
+proc_max = 3; % 工程の数
+time_max = 30;% 時間の数
 
 % 仕事iのj番目の工程の処理時間
 a_times = [
@@ -53,8 +53,11 @@ a_orders_i = [
 a_orders = repmat(a_orders_i,1,1,3);
 a_orders = permute(a_orders,[3,1,2]);
 
-% 制約
-A = [];
+% 決定変数
+A.c = []; % Costs(コスト)
+A.d = []; % Delta (仕事 w の工程 p を第 t 期に処理するなら１、そうでなければ0)
+A.s = []; % Start (仕事 w の工程 p を第 t 期に開始するなら１、そうでなければ0)
+A.f = []; % Finish(仕事 w の工程 p を第 t 期に終了するなら１、そうでなければ0)
 b = [];
 ctype = "";
 
@@ -62,14 +65,20 @@ ctype = "";
 LAST_PROCESS=1
 for w=1:work_max
     s = a_shops(w,LAST_PROCESS);
-    x = zeros(work_max, shop_max, time_max);
+    x.c = 1;
+    x.d = zeros(work_max, proc_max, time_max);
+    x.s = zeros(work_max, proc_max, time_max);
+    x.f = zeros(work_max, proc_max, time_max);
+
     for t=1:time_max
-        x(w,s,t) = -t; % t x delta
+        x.d(w,s,t) = -t;
     end
-    x = [x(:); 1]; % Cmax
-    A = cat(2,A,x);
+    A.c = cat(2,A.c, x.c(:));
+    A.d = cat(2,A.d, x.d(:));
+    A.s = cat(2,A.s, x.s(:));
+    A.f = cat(2,A.f, x.f(:));
     b = cat(2,b,a_times(w,LAST_PROCESS));
-    ctype = cat(2,ctype,"L");
+    ctype = cat(2,ctype,LOWER_CONST);
 end
 
 % (37) 工程処理順序の制約
@@ -80,17 +89,23 @@ for w=1:work_max
 for i=1:length(pst_process)
         pre_shop = a_shops(w,pre_process(i)); % 前に使用する機械
         pst_shop = a_shops(w,pst_process(i)); % 後に使用する機械
-        x = zeros(work_max, shop_max, time_max);
+        x.c = 0;
+        x.d = zeros(work_max, proc_max, time_max);
+        x.s = zeros(work_max, proc_max, time_max);
+        x.f = zeros(work_max, proc_max, time_max);
+
         for t=1:time_max
-            x(w,pre_shop,t) = -t; % t x delta
+            x.d(w,pre_shop,t) = -t;
         end
         for t=1:time_max
-            x(w,pst_shop,t) = +t; % t x delta
+            x.d(w,pst_shop,t) = +t;
         end
-        x = [x(:); 0]; % Cmax
-        A = cat(2,A,x);
+        A.c = cat(2,A.c, x.c(:));
+        A.d = cat(2,A.d, x.d(:));
+        A.s = cat(2,A.s, x.s(:));
+        A.f = cat(2,A.f, x.f(:));
         b = cat(2,b,a_times(w,pre_process(i)));
-        ctype = cat(2,ctype,"L");
+        ctype = cat(2,ctype,LOWER_CONST);
     end
 end
 
@@ -100,71 +115,100 @@ for w=1:work_max
         s = a_shops(w,i);
         p = a_times(w,i);
         for t=1:(time_max-p-1)
-            x = zeros(work_max, shop_max, time_max);
+            x.c = 0;
+            x.d = zeros(work_max, proc_max, time_max);
+            x.s = zeros(work_max, proc_max, time_max);
+            x.f = zeros(work_max, proc_max, time_max);
+
             for k=1:work_max
                 if k==w
                     % this work
-                    x(k,s,t) = 100;
+                    x.d(k,s,t) = 100;
                 else
                     % other work
                     for j=t:(t+p-1)
-                        x(k,s,j) = 1;
+                        x.d(k,s,j) = 1;
                     end
                 end
             end
-            x = [x(:); 0]; % Cmax
-            A = cat(2,A,x);
+            A.c = cat(2,A.c, x.c(:));
+            A.d = cat(2,A.d, x.d(:));
+            A.s = cat(2,A.s, x.s(:));
+            A.f = cat(2,A.f, x.f(:));
             b = cat(2,b,100);
-            ctype = cat(2,ctype,"U");
+            ctype = cat(2,ctype,UPPER_CONST);
         end
     end
 end
 
 % (39) ある機械におけるある仕事の実行回数
-count=zeros(work_max, shop_max);
+count=zeros(work_max, proc_max);
 for w=1:work_max
     for i=1:length(a_shops(w,:))
         count(w,a_shops(w,i)) += 1;
     end
 end
 for w=1:work_max
-    for s=1:shop_max
-        x = zeros(work_max, shop_max, time_max);
+    for s=1:proc_max
+        x.c = 0;
+        x.d = zeros(work_max, proc_max, time_max);
+        x.s = zeros(work_max, proc_max, time_max);
+        x.f = zeros(work_max, proc_max, time_max);
+
         for t=1:time_max
-            x(w,s,t) = 1;
+            x.d(w,s,t) = 1;
         end
-        x = [x(:); 0]; % Cmax
-        A = cat(2,A,x);
+        A.c = cat(2,A.c, x.c(:));
+        A.d = cat(2,A.d, x.d(:));
+        A.s = cat(2,A.s, x.s(:));
+        A.f = cat(2,A.f, x.f(:));
         b = cat(2,b,count(w,s));
-        ctype = cat(2,ctype,"S");
+        ctype = cat(2,ctype,EQUAL_CONST);
     end
 end
 
-A = A';
-b = b';
-vartype = repmat("I", 1, size(A)(2));
-vartype(end) = "C"; % Cmax
+% 実数／整数
+vtype.c = repmat("C", 1, 1);
+vtype.d = repmat("I", 1, prod([work_max, proc_max, time_max]));
+vtype.s = repmat("I", 1, prod([work_max, proc_max, time_max]));
+vtype.f = repmat("I", 1, prod([work_max, proc_max, time_max]));
 
 % 目的関数
-c = zeros(1, size(A)(2))';
-c(end) = 1; % Cmax
+c.c = 1;
+c.d = zeros(work_max, proc_max, time_max)(:);
+c.s = zeros(work_max, proc_max, time_max)(:);
+c.f = zeros(work_max, proc_max, time_max)(:);
 
 % 非負制約
-lb = zeros(1, size(A)(2));
-ub = ones (1, size(A)(2));
-ub(end) = time_max; % Cmax
+lb.c = 0;
+lb.d = zeros(work_max, proc_max, time_max)(:)';
+lb.s = zeros(work_max, proc_max, time_max)(:)';
+lb.f = zeros(work_max, proc_max, time_max)(:)';
+ub.c = time_max;
+ub.d = ones (work_max, proc_max, time_max)(:)';
+ub.s = ones (work_max, proc_max, time_max)(:)';
+ub.f = ones (work_max, proc_max, time_max)(:)';
+
+% 結合
+c = cat(1, c.d, c.c);
+A = cat(1, A.d, A.c)';
+b = b';
+lb = cat(2, lb.d, lb.c);
+ub = cat(2, ub.d, ub.c);
+ctype = ctype;
+vtype = cat(2, vtype.d, vtype.c);
 
 sense = MINIMIZE;
 % param.msglev = GLP_MSG_ALL;
 param.itlim = 100;
 
-[xmin, fmin, status, extra] = glpk (c, A, b, lb, ub, ctype, vartype, sense, param);
+[xmin, fmin, status, extra] = glpk (c, A, b, lb, ub, ctype, vtype, sense, param);
 
 disp("==== RESULT ====")
 disp(["Costs:", num2str(fmin)])
 disp("Variables:")
 Cmax = xmin(end)
-xmin = reshape(xmin(1:end-1), work_max, shop_max, time_max);
+xmin = reshape(xmin(1:end-1), work_max, proc_max, time_max);
 
 dispResult(xmin);
 dispJobSch(xmin);
