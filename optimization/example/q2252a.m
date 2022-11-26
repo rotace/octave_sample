@@ -1,4 +1,6 @@
-% シムシティ生産計画ソルバー
+% 2.25.2 フローショップ問題
+% https://www.msi.co.jp/nuopt/docs/v23/examples/html/02-25-02.html
+% https://www.jstage.jst.go.jp/article/isciesci/61/1/61_14/_pdf/-char/ja
 clear all
 common
 
@@ -49,16 +51,6 @@ a_shops = [
     1 2 3;
     1 2 3
 ];
-% 仕事iのj番目の工程の前にk番目の工程が必要かどうか
-% （工程順序を表すグラフ／隣接行列）
-IS_NEED=1;
-a_orders_i = [
-    0 0 0;
-    IS_NEED 0 0;
-    0 IS_NEED 0
-];
-a_orders = repmat(a_orders_i,1,1,3);
-a_orders = permute(a_orders,[3,1,2]);
 
 % 決定変数
 A.c = []; % Costs(コスト)
@@ -93,16 +85,15 @@ end
 
 % (30) 工程処理順序の制約
 for w=1:work_max
-    [pst_proc,pre_proc]=find(squeeze(a_orders(w,:,:))==IS_NEED);
-    for i=1:length(pst_proc)
-        pre_shop = a_shops(w,pre_proc(i));
-        pst_shop = a_shops(w,pst_proc(i));
+    for p=1:(proc_max-1)
+        pre_shop = a_shops(w,p);
+        pst_shop = a_shops(w,p+1);
 
         x.c = 0;
         x.d = zeros(work_max, shop_max, time_max);
         x.s = zeros(work_max, shop_max, time_max);
         x.f = zeros(work_max, shop_max, time_max);
-        y = a_times(w,pre_proc(i));
+        y = a_times(w,p);
 
         for t=1:time_max
             x.s(w,pre_shop,t) = -t;

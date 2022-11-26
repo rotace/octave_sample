@@ -1,4 +1,12 @@
 % 定数
 MINIMIZE = 1;
 MAXIMIZE = -1;
+
+GLP_MSG_OFF = 0;
+GLP_MSG_ERR = 1;
+GLP_MSG_ON  = 2;
 GLP_MSG_ALL = 3;
+
+UPPER_CONST = "U";
+LOWER_CONST = "L";
+EQUAL_CONST = "S";
