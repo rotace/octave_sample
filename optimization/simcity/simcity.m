@@ -39,23 +39,23 @@ time_max = 30;% 時間の数
 
 % 仕事iのj番目の工程の処理時間
 a_times = [
-    5 8 4;
-    5 4 6;
-    6 5 5
+    4 8 5;
+    6 4 5;
+    5 5 6
 ];
 % 仕事iのj番目の工程の使用機械
 a_shops = [
-    1 2 3;
-    1 2 3;
-    1 2 3
+    3 2 1;
+    3 2 1;
+    3 2 1
 ];
 % 仕事iのj番目の工程の前にk番目の工程が必要かどうか
 % （工程順序を表すグラフ／隣接行列）
 IS_NEED=1;
 a_orders_i = [
-    0 0 0;
-    IS_NEED 0 0;
-    0 IS_NEED 0
+    0 IS_NEED 0;
+    0 0 IS_NEED;
+    0 0 0
 ];
 a_orders = repmat(a_orders_i,1,1,3);
 a_orders = permute(a_orders,[3,1,2]);
@@ -69,7 +69,7 @@ b = [];
 ctype = "";
 
 % (29) コストの定義
-LAST_PROCESS=proc_max;
+LAST_PROCESS=1;
 for w=1:work_max
     s = a_shops(w,LAST_PROCESS);
     x.c = -1;
