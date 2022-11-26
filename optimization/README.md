@@ -17,5 +17,5 @@
 
 スマホアプリの [SIMCITY BUILDIT](https://play.google.com/store/apps/details?id=com.ea.game.simcitymobile_row&hl=ja&gl=US&pli=1) を題材にしたジョブショップスケジューリング問題のソルバー
 
-octaveによる実装に不向きであるため、開発停止中。
+プロトタイプの時点で計算時間が数百秒程度かかるため、開発停止中。
 
